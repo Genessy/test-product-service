@@ -1,17 +1,18 @@
-package com.epsi.TestProductService;
+package com.epsi.TestProductService.entity;
 
 public class Product {
-    private int id;
+    private String id;
     private String name;
     private String description;
+    private String origin;
     private double price;
     private int stock;
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -31,6 +32,14 @@ public class Product {
         this.description = description;
     }
 
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
+    }
+
     public double getPrice() {
         return price;
     }
@@ -44,19 +53,6 @@ public class Product {
     }
 
     public void setStock(int stock) {
-        this.stock = stock;
-    }
-
-    //Jackson a besoin d’un constructeur sans argument pour créer des objets quand il lit du JSON parce qu’il ne sait pas comment appeler un constructeur avec arguments sans aide explicite.
-    public Product() {
-
-    }
-
-    public Product(int id, String name, double price, String description, int stock) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
-        this.description = description;
         this.stock = stock;
     }
 }

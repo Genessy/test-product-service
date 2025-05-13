@@ -9,3 +9,6 @@ docker run -p 8080:8080 genessy/epsi4a-mspr4-mproduct:0.1
   
 Push une image sur docker hub :  
 docker push genessy/epsi4a-mspr4-mproduct:0.1  
+
+Lancer le compose :  
+docker compose up --build
