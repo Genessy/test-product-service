@@ -11,4 +11,7 @@ Push une image sur docker hub :
 docker push genessy/epsi4a-mspr4-mproduct:0.1  
 
 Lancer le compose :  
-docker compose up --build
+docker compose up --build  
+  
+Lien du Swagger :  
+http://localhost:8080/swagger-ui/index.html#/
