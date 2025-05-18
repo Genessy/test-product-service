@@ -6,7 +6,6 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,5 +100,27 @@ public class ProductService {
         DocumentReference docRef = db.collection(COLLECTION_NAME).document(id);
         docRef.delete();
         return "Le produit à bien été supprimé de la base de donnée.";
+    }
+
+    public static boolean manageProductOrders(String productId, int stock) throws ExecutionException, InterruptedException {
+        Firestore db = FirestoreClient.getFirestore();
+        DocumentReference docRef = db.collection(COLLECTION_NAME).document(productId);
+        DocumentSnapshot document = docRef.get().get();
+
+        if (document.exists()) {
+            Product product = document.toObject(Product.class);
+            product.setId(document.getId());
+
+            if (product.getStock() >= stock) {
+                product.setStock(product.getStock() - stock);
+
+                Map<String, Object> update = new HashMap<>();
+                update.put("stock", product.getStock());
+
+                docRef.update(update).get();
+                return true;
+            }
+        }
+        return false;
     }
 }
