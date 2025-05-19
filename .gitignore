@@ -37,3 +37,6 @@ docker-compose.yml
 
 ### Secrets ###
 /local-secrets/*
+
+### Logs ###
+/logs/*
