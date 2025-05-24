@@ -1,7 +1,7 @@
 package com.epsi.TestProductService.service;
 
-import com.epsi.TestProductService.dto.ProductDto;
 import com.epsi.TestProductService.entity.Product;
+import com.epsi.TestProductService.exception.ResourceNotFoundException;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
@@ -16,111 +16,158 @@ import java.util.stream.Collectors;
 public class ProductService {
     private static final String COLLECTION_NAME = "products";
 
-    public List<Product> getAllProducts() throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
-
-        ApiFuture<QuerySnapshot> future = db.collection(COLLECTION_NAME).get();
-        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-        return documents.stream().map(doc -> {
-            Product product = doc.toObject(Product.class);
-            product.setId(doc.getId());
-            return product;
-        }).collect(Collectors.toList());
-    }
-
-    public Product getProduct(String id) throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
-        DocumentSnapshot document = db.collection(COLLECTION_NAME).document(id).get().get();
-        if (document.exists()) {
-            Product product = document.toObject(Product.class);
-            product.setId(document.getId());
-            return product;
-        } else {
-            return null;
+    public List<Product> getAllProducts() {
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+            ApiFuture<QuerySnapshot> future = db.collection(COLLECTION_NAME).get();
+            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+            return documents.stream().map(doc -> {
+                Product product = doc.toObject(Product.class);
+                product.setId(doc.getId());
+                return product;
+            }).collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la reception des produits", e);
         }
     }
 
-    public String addProduct(Product product) throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
-        DocumentReference docRef = db.collection(COLLECTION_NAME).document();
+    public Product getProduct(String id) {
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+            DocumentSnapshot document = db.collection(COLLECTION_NAME).document(id).get().get();
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("name", product.getName());
-        data.put("description", product.getDescription());
-        data.put("origin", product.getOrigin());
-        data.put("price", product.getPrice());
-        data.put("stock", product.getStock());
-
-        docRef.set(data).get();
-
-        return "Produit bien ajouté à la base de donnée.";
-    }
-
-    public String updateProduct(Product product) throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
-        DocumentReference docRef = db.collection(COLLECTION_NAME).document(product.getId());
-        Map<String, Object> data = new HashMap<>();
-        data.put("name", product.getName());
-        data.put("description", product.getDescription());
-        data.put("origin", product.getOrigin());
-        data.put("price", product.getPrice());
-        data.put("stock", product.getStock());
-
-        docRef.set(data).get();
-
-        return " Le produit à bien été complément mis à jour.";
-    }
-
-    public String patchProduct(String id, ProductDto productDto) throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
-        DocumentReference docRef = db.collection(COLLECTION_NAME).document(id);
-        DocumentSnapshot document = docRef.get().get();
-
-        Map<String, Object> updates = new HashMap<>();
-
-        if (productDto.getName() != null) updates.put("name", productDto.getName());
-        if (productDto.getDescription() != null) updates.put("description", productDto.getDescription());
-        if (productDto.getOrigin() != null) updates.put("origin", productDto.getOrigin());
-        if (productDto.getPrice() != null) updates.put("price", productDto.getPrice());
-        if (productDto.getStock() != null) updates.put("stock", productDto.getStock());
-
-        if (!updates.isEmpty()) {
-            docRef.update(updates).get();
-        }
-
-        DocumentSnapshot updatedSnapshot = docRef.get().get();
-        Product updatedProduct = updatedSnapshot.toObject(Product.class);
-        updatedProduct.setId(updatedSnapshot.getId());
-
-        return "Le produit à bien été partiellement mis à jour.";
-    }
-
-    public String deleteProduct(String id) throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
-        DocumentReference docRef = db.collection(COLLECTION_NAME).document(id);
-        docRef.delete();
-        return "Le produit à bien été supprimé de la base de donnée.";
-    }
-
-    public static boolean manageProductOrders(String productId, int stock) throws ExecutionException, InterruptedException {
-        Firestore db = FirestoreClient.getFirestore();
-        DocumentReference docRef = db.collection(COLLECTION_NAME).document(productId);
-        DocumentSnapshot document = docRef.get().get();
-
-        if (document.exists()) {
-            Product product = document.toObject(Product.class);
-            product.setId(document.getId());
-
-            if (product.getStock() >= stock) {
-                product.setStock(product.getStock() - stock);
-
-                Map<String, Object> update = new HashMap<>();
-                update.put("stock", product.getStock());
-
-                docRef.update(update).get();
-                return true;
+            if (document.exists()) {
+                Product product = document.toObject(Product.class);
+                product.setId(document.getId());
+                return product;
+            } else {
+                throw new ResourceNotFoundException("Le produit avec l'ID " + id + " n'existe pas");
             }
+
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la récupération du produit avec l'ID " + id, e);
         }
-        return false;
     }
+
+    public String addProduct(Product product) {
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+            DocumentReference docRef = db.collection(COLLECTION_NAME).document();
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("name", product.getName());
+            data.put("description", product.getDescription());
+            data.put("origin", product.getOrigin());
+            data.put("price", product.getPrice());
+            data.put("stock", product.getStock());
+
+            docRef.set(data).get();
+
+            return "Produit bien ajouté à la base de donnée.";
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de l'ajour d'un produit", e);
+        }
+
+    }
+
+    public void putProduct(Product product) {
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+            DocumentReference docRef = db.collection(COLLECTION_NAME).document(product.getId());
+
+            // Vérifie que le produit existe avant update
+            DocumentSnapshot document = docRef.get().get();
+            if (!document.exists()) {
+                throw new ResourceNotFoundException("Produit avec l'ID " + product.getId() + " non trouvé pour mise à jour");
+            }
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("name", product.getName());
+            data.put("description", product.getDescription());
+            data.put("origin", product.getOrigin());
+            data.put("price", product.getPrice());
+            data.put("stock", product.getStock());
+
+            docRef.set(data).get(); // .set() écrase le document existant
+
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la mise à jour du produit avec l'ID " + product.getId(), e);
+        }
+    }
+
+//    public String patchProduct(String id, ProductDto productDto) {
+//        try {
+//            Firestore db = FirestoreClient.getFirestore();
+//            DocumentReference docRef = db.collection(COLLECTION_NAME).document(id);
+//            DocumentSnapshot document = docRef.get().get();
+//
+//            Map<String, Object> updates = new HashMap<>();
+//
+//            if (productDto.getName() != null) updates.put("name", productDto.getName());
+//            if (productDto.getDescription() != null) updates.put("description", productDto.getDescription());
+//            if (productDto.getOrigin() != null) updates.put("origin", productDto.getOrigin());
+//            if (productDto.getPrice() != null) updates.put("price", productDto.getPrice());
+//            if (productDto.getStock() != null) updates.put("stock", productDto.getStock());
+//
+//            if (!updates.isEmpty()) {
+//                docRef.update(updates).get();
+//            }
+//
+//            DocumentSnapshot updatedSnapshot = docRef.get().get();
+//            Product updatedProduct = updatedSnapshot.toObject(Product.class);
+//            updatedProduct.setId(updatedSnapshot.getId());
+//
+//            return "Le produit à bien été partiellement mis à jour.";
+//        } catch (Exception e) {
+//            throw new RuntimeException("Erreur lors de la mise à jour partielle d'un produit", e);
+//        }
+//    }
+
+    public void deleteProduct(String id) {
+        Firestore db = FirestoreClient.getFirestore();
+        DocumentReference docRef = db.collection(COLLECTION_NAME).document(id);
+
+        try {
+            DocumentSnapshot document = docRef.get().get();
+            if (!document.exists()) {
+                throw new ResourceNotFoundException("Produit avec l'ID " + id + " non trouvé pour suppression");
+            }
+
+            docRef.delete().get();
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Thread interrompu", e);
+
+        } catch (ExecutionException e) {
+            throw new RuntimeException("Erreur lors de l'accès Firestore", e);
+        }
+    }
+
+
+//    public static boolean manageProductOrders(String productId, int stock) throws ExecutionException, InterruptedException {
+//        Firestore db = FirestoreClient.getFirestore();
+//        DocumentReference docRef = db.collection(COLLECTION_NAME).document(productId);
+//        DocumentSnapshot document = docRef.get().get();
+//
+//        if (document.exists()) {
+//            Product product = document.toObject(Product.class);
+//            product.setId(document.getId());
+//
+//            if (product.getStock() >= stock) {
+//                product.setStock(product.getStock() - stock);
+//
+//                Map<String, Object> update = new HashMap<>();
+//                update.put("stock", product.getStock());
+//
+//                docRef.update(update).get();
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 }
