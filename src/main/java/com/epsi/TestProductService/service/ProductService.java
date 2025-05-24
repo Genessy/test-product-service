@@ -99,34 +99,6 @@ public class ProductService {
         }
     }
 
-//    public String patchProduct(String id, ProductDto productDto) {
-//        try {
-//            Firestore db = FirestoreClient.getFirestore();
-//            DocumentReference docRef = db.collection(COLLECTION_NAME).document(id);
-//            DocumentSnapshot document = docRef.get().get();
-//
-//            Map<String, Object> updates = new HashMap<>();
-//
-//            if (productDto.getName() != null) updates.put("name", productDto.getName());
-//            if (productDto.getDescription() != null) updates.put("description", productDto.getDescription());
-//            if (productDto.getOrigin() != null) updates.put("origin", productDto.getOrigin());
-//            if (productDto.getPrice() != null) updates.put("price", productDto.getPrice());
-//            if (productDto.getStock() != null) updates.put("stock", productDto.getStock());
-//
-//            if (!updates.isEmpty()) {
-//                docRef.update(updates).get();
-//            }
-//
-//            DocumentSnapshot updatedSnapshot = docRef.get().get();
-//            Product updatedProduct = updatedSnapshot.toObject(Product.class);
-//            updatedProduct.setId(updatedSnapshot.getId());
-//
-//            return "Le produit à bien été partiellement mis à jour.";
-//        } catch (Exception e) {
-//            throw new RuntimeException("Erreur lors de la mise à jour partielle d'un produit", e);
-//        }
-//    }
-
     public void deleteProduct(String id) {
         Firestore db = FirestoreClient.getFirestore();
         DocumentReference docRef = db.collection(COLLECTION_NAME).document(id);
@@ -147,27 +119,4 @@ public class ProductService {
             throw new RuntimeException("Erreur lors de l'accès Firestore", e);
         }
     }
-
-
-//    public static boolean manageProductOrders(String productId, int stock) throws ExecutionException, InterruptedException {
-//        Firestore db = FirestoreClient.getFirestore();
-//        DocumentReference docRef = db.collection(COLLECTION_NAME).document(productId);
-//        DocumentSnapshot document = docRef.get().get();
-//
-//        if (document.exists()) {
-//            Product product = document.toObject(Product.class);
-//            product.setId(document.getId());
-//
-//            if (product.getStock() >= stock) {
-//                product.setStock(product.getStock() - stock);
-//
-//                Map<String, Object> update = new HashMap<>();
-//                update.put("stock", product.getStock());
-//
-//                docRef.update(update).get();
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
 }

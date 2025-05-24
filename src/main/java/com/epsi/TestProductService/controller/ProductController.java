@@ -1,6 +1,8 @@
 package com.epsi.TestProductService.controller;
 
+import com.epsi.TestProductService.dto.ProductCreateRequest;
 import com.epsi.TestProductService.dto.ProductDto;
+import com.epsi.TestProductService.dto.ProductResponse;
 import com.epsi.TestProductService.entity.Product;
 import com.epsi.TestProductService.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,13 +10,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RestController
-@RequestMapping("/products")
+@RequestMapping("api/v1/")
 public class ProductController {
 
     private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
@@ -23,37 +27,93 @@ public class ProductController {
     private ProductService productService;
 
     @Tag(name = "\uD83D\uDD0D Lecture")
-    @GetMapping
+    @GetMapping("products")
     @Operation(summary = "Obtenir tous les produits de la base de donnée.")
-    public List<Product> getAllProducts() throws ExecutionException, InterruptedException {
+    public ResponseEntity<Map<String, Object>> getAllProducts() {
         logger.info("Obtenir tous les produits : ✅");
-        return productService.getAllProducts();
+        List<Product> products = productService.getAllProducts();
+
+        List<ProductResponse> responseList = products.stream().map(product -> {
+            ProductResponse.ProductAttributes attributes = new ProductResponse.ProductAttributes();
+            attributes.setName(product.getName());
+            attributes.setDescription(product.getDescription());
+            attributes.setOrigin(product.getOrigin());
+            attributes.setPrice(product.getPrice());
+            attributes.setStock(product.getStock());
+
+            ProductResponse response = new ProductResponse();
+            response.setId(product.getId());
+            response.setAttributes(attributes);
+            return response;
+        }).collect(Collectors.toList());
+
+        Map<String, Object> jsonApi = new HashMap<>();
+        jsonApi.put("data", responseList);
+
+        return ResponseEntity.ok(jsonApi);
     }
 
     @Tag(name = "\uD83D\uDD0D Lecture")
-    @GetMapping("/{id}")
+    @GetMapping("products/{id}")
     @Operation(summary = "Récupère un produit par son ID.")
-    public ResponseEntity<Product> getProduct(@PathVariable String id) {
+    public ResponseEntity<Map<String, Object>> getProduct(@PathVariable String id) {
         logger.info("Récupération d’un produit par ID : 🔎 {}", id);
         Product product = productService.getProduct(id);
-        return ResponseEntity.ok(product);
+
+        ProductResponse.ProductAttributes attributes = new ProductResponse.ProductAttributes();
+        attributes.setName(product.getName());
+        attributes.setDescription(product.getDescription());
+        attributes.setOrigin(product.getOrigin());
+        attributes.setPrice(product.getPrice());
+        attributes.setStock(product.getStock());
+
+        ProductResponse response = new ProductResponse();
+        response.setId(product.getId());
+        response.setAttributes(attributes);
+
+        Map<String, Object> jsonApi = new HashMap<>();
+        jsonApi.put("data", response);
+
+        return ResponseEntity.ok(jsonApi);
     }
 
     @Tag(name = "\uD83E\uDEB6 Écriture")
-    @PostMapping
-    @Operation(summary = "Ajoute un produit à la base de donnée.")
-    public String addProduct(@RequestBody ProductDto productDto) throws ExecutionException, InterruptedException {
+    @PostMapping("products")
+    @Operation(summary = "Ajoute un produit à la base de donnée (format JSON:API).")
+    public ResponseEntity<Map<String, Object>> addProduct(@RequestBody ProductCreateRequest request) {
+        ProductCreateRequest.ProductAttributes attrs = request.getData().getAttributes();
+
         Product product = new Product();
-        product.setName(productDto.getName());
-        product.setDescription(productDto.getDescription());
-        product.setOrigin(productDto.getOrigin());
-        product.setPrice(productDto.getPrice());
-        product.setStock(productDto.getStock());
-        return productService.addProduct(product);
+        product.setName(attrs.getName());
+        product.setDescription(attrs.getDescription());
+        product.setOrigin(attrs.getOrigin());
+        product.setPrice(attrs.getPrice());
+        product.setStock(attrs.getStock());
+
+        String id = productService.addProduct(product);
+
+        List<Product> produits = productService.getAllProducts();
+        Product createdProduct = produits.stream().filter(p -> p.getName().equals(product.getName())).findFirst().orElse(null);
+
+        ProductResponse.ProductAttributes attributes = new ProductResponse.ProductAttributes();
+        attributes.setName(product.getName());
+        attributes.setDescription(product.getDescription());
+        attributes.setOrigin(product.getOrigin());
+        attributes.setPrice(product.getPrice());
+        attributes.setStock(product.getStock());
+
+        ProductResponse response = new ProductResponse();
+        response.setId(createdProduct != null ? createdProduct.getId() : "unknown");
+        response.setAttributes(attributes);
+
+        Map<String, Object> jsonApi = new HashMap<>();
+        jsonApi.put("data", response);
+
+        return ResponseEntity.status(201).body(jsonApi);
     }
 
     @Tag(name = "\uD83E\uDEB6 Écriture")
-    @PutMapping("/{id}")
+    @PutMapping("products/{id}")
     @Operation(summary = "Modifie un produit dans la base de données.")
     public ResponseEntity<String> updateProduct(@PathVariable String id, @RequestBody ProductDto productDto) {
         Product product = new Product();
@@ -67,23 +127,15 @@ public class ProductController {
         logger.info("Modification totale d'un produit : ✅ {}", product.getName());
         productService.putProduct(product);
 
-        return ResponseEntity.ok("Le produit a bien été mis à jour.");
+        return ResponseEntity.status(200).build();
     }
 
-//    @Tag(name = "\uD83E\uDEB6 Écriture")
-//    @PatchMapping("/{id}")
-//    @Operation(summary = "Modifie partiellement un produit dans la base de donnée.")
-//    public String patchProduct(@PathVariable String id, @RequestBody ProductDto productDto) throws ExecutionException, InterruptedException {
-//        logger.info("Modification d'un produit : ✅ {}", productDto.getName());
-//        return productService.patchProduct(id, productDto);
-//    }
-
     @Tag(name = "⚠️ Suppressions")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("products/{id}")
     @Operation(summary = "Supprime le produit de la base de données.")
     public ResponseEntity<String> deleteProduct(@PathVariable String id) {
         logger.info("Suppression d'un produit : ✅ {}", id);
         productService.deleteProduct(id);
-        return ResponseEntity.ok("Le produit a bien été supprimé de la base de données.");
+        return ResponseEntity.noContent().build();
     }
 }
