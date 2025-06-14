@@ -16,11 +16,11 @@ public class ProductRpcServer {
 
         try {
             String reponse = "ok";
-            logger.debug("Traitement terminé avec succès");
+            logger.info("Traitement terminé avec succès");
             logger.info("Envoi de la réponse : {}", reponse);
             return reponse;
         } catch (Exception e) {
-            logger.error("Erreur pendant le traitement RPC", e);
+            logger.info("Erreur pendant le traitement RPC", e);
             return "error";
         }
     }
