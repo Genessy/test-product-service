@@ -1,29 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<configuration debug="true">
 
-    <property name="LOG_PATH" value="${LOG_PATH:-./logs}" />
-    <property name="LOG_FILE" value="${LOG_PATH}/product-service.json" />
-
-    <appender name="JSON-FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_FILE}</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_PATH}/product-service-%d{yyyy-MM-dd}.json</fileNamePattern>
-            <maxHistory>7</maxHistory>
-        </rollingPolicy>
-        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
-            <providers>
-                <timestamp />
-                <logLevel />
-                <loggerName />
-                <threadName />
-                <message />
-                <stackTrace />
-            </providers>
-        </encoder>
+    <appender name="HTTP" class="com.epsi.TestProductService.log.HttpLogAppender">
+        <url>http://logstash:5044</url>
     </appender>
 
     <root level="INFO">
-        <appender-ref ref="JSON-FILE" />
+        <appender-ref ref="HTTP"/>
     </root>
 
 </configuration>

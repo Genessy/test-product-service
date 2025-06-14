@@ -27,9 +27,9 @@ public class ProductConsumer {
 //    }
 //}
 
-    @RabbitListener(queues = RabbitMQConfig.COMMANDE_PRODUIT_QUEUE)
-    public void consummerOrderProduct(String message) {
-        System.out.println("Message texte brut reçu : " + message);
-        logger.info("Received raw order message: {}", message);
-    }
+//    @RabbitListener(queues = RabbitMQConfig.COMMANDE_PRODUIT_QUEUE)
+//    public void consummerOrderProduct(String message) {
+//        System.out.println("Message texte brut reçu : " + message);
+//        logger.info("Received raw order message: {}", message);
+//    }
 }
