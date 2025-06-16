@@ -1,11 +1,7 @@
 package com.epsi.TestProductService.rabbitmq;
 
-import com.epsi.TestProductService.dto.ProductOrderDto;
-import com.epsi.TestProductService.service.ProductService;
-import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 @Component

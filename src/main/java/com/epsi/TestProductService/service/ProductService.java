@@ -62,6 +62,7 @@ public class ProductService {
             data.put("origin", product.getOrigin());
             data.put("price", product.getPrice());
             data.put("stock", product.getStock());
+            data.put("tag", product.getTag());
 
             docRef.set(data).get();
 
@@ -89,6 +90,7 @@ public class ProductService {
             data.put("origin", product.getOrigin());
             data.put("price", product.getPrice());
             data.put("stock", product.getStock());
+            data.put("tag", product.getTag());
 
             docRef.set(data).get(); // .set() écrase le document existant
 

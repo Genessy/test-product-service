@@ -6,6 +6,7 @@ public class ProductDto {
     private String origin;
     private Double price;
     private Integer stock;
+    private String tag;
 
     public ProductDto() {}
 
@@ -47,5 +48,13 @@ public class ProductDto {
 
     public void setPrice(Double price) {
         this.price = price;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 }

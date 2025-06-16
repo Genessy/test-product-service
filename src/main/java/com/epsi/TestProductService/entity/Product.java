@@ -7,6 +7,7 @@ public class Product {
     private String origin;
     private double price;
     private int stock;
+    private String tag;
 
     public String getId() {
         return id;
@@ -54,5 +55,13 @@ public class Product {
 
     public void setStock(int stock) {
         this.stock = stock;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 }

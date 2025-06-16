@@ -40,6 +40,7 @@ public class ProductController {
             attributes.setOrigin(product.getOrigin());
             attributes.setPrice(product.getPrice());
             attributes.setStock(product.getStock());
+            attributes.setTag(product.getTag());
 
             ProductResponse response = new ProductResponse();
             response.setId(product.getId());
@@ -66,6 +67,7 @@ public class ProductController {
         attributes.setOrigin(product.getOrigin());
         attributes.setPrice(product.getPrice());
         attributes.setStock(product.getStock());
+        attributes.setTag(product.getTag());
 
         ProductResponse response = new ProductResponse();
         response.setId(product.getId());
@@ -89,6 +91,7 @@ public class ProductController {
         product.setOrigin(attrs.getOrigin());
         product.setPrice(attrs.getPrice());
         product.setStock(attrs.getStock());
+        product.setTag(attrs.getTag());
 
         String id = productService.addProduct(product);
 
@@ -101,6 +104,7 @@ public class ProductController {
         attributes.setOrigin(product.getOrigin());
         attributes.setPrice(product.getPrice());
         attributes.setStock(product.getStock());
+        attributes.setTag(product.getTag());
 
         ProductResponse response = new ProductResponse();
         response.setId(createdProduct != null ? createdProduct.getId() : "unknown");
@@ -123,6 +127,7 @@ public class ProductController {
         product.setOrigin(productDto.getOrigin());
         product.setPrice(productDto.getPrice());
         product.setStock(productDto.getStock());
+        product.setTag(productDto.getTag());
 
         logger.info("Modification totale d'un produit : ✅ {}", product.getName());
         productService.putProduct(product);

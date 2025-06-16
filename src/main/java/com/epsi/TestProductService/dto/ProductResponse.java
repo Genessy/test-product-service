@@ -35,6 +35,7 @@ public class ProductResponse {
         private String origin;
         private double price;
         private int stock;
+        private String tag;
 
         public String getName() {
             return name;
@@ -75,5 +76,9 @@ public class ProductResponse {
         public void setStock(int stock) {
             this.stock = stock;
         }
+
+        public String getTag() {return tag;}
+
+        public void setTag(String tag) {this.tag = tag;}
     }
 }

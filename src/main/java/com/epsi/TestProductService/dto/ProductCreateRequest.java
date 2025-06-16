@@ -38,6 +38,7 @@ public class ProductCreateRequest {
         private String origin;
         private double price;
         private int stock;
+        private String tag;
 
         // Getters & Setters
         public String getName() { return name; }
@@ -50,5 +51,7 @@ public class ProductCreateRequest {
         public void setPrice(double price) { this.price = price; }
         public int getStock() { return stock; }
         public void setStock(int stock) { this.stock = stock; }
+        public String getTag() { return tag; }
+        public void setTag(String tag) { this.tag = tag; }
     }
 }
