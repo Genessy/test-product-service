@@ -20,13 +20,13 @@ public class RabbitMQConfig {
     public static final String ROUTING_KEY = "test.dim";
 
     @Bean
-    public Queue queue() {
+    public Queue productQueue() {
         logger.info("Queue déclarée : {}", QUEUE);
         return new Queue(QUEUE);
     }
 
     @Bean
-    public DirectExchange exchange() {
+    public DirectExchange productExchange() {
         logger.info("Exchange déclaré : {}", EXCHANGE);
         return new DirectExchange(EXCHANGE);
     }
