@@ -1,11 +1,21 @@
 package com.epsi.TestProductService.service;
 
+import com.epsi.TestProductService.dto.order.common.AvailableProductDto;
+import com.epsi.TestProductService.dto.order.common.WishedAndAvailableProductDto;
+import com.epsi.TestProductService.dto.order.common.WishedProductDto;
+import com.epsi.TestProductService.dto.order.incoming.OrderMessageDto;
+import com.epsi.TestProductService.dto.order.outgoing.ProductOrderResponseDto;
 import com.epsi.TestProductService.entity.Product;
 import com.epsi.TestProductService.exception.ResourceNotFoundException;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
+    private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
     private static final String COLLECTION_NAME = "products";
 
     public List<Product> getAllProducts() {
@@ -120,5 +131,106 @@ public class ProductService {
         } catch (ExecutionException e) {
             throw new RuntimeException("Erreur lors de l'accès Firestore", e);
         }
+    }
+
+    public ProductOrderResponseDto handleOrderCheck(OrderMessageDto order) {
+        Firestore db = FirestoreClient.getFirestore();
+
+        List<AvailableProductDto> ordered = new ArrayList<>();
+        List<WishedAndAvailableProductDto> partiallyOrdered = new ArrayList<>();
+        List<WishedAndAvailableProductDto> notAvailable = new ArrayList<>();
+
+        for (WishedProductDto item : order.getProducts()) {
+            DocumentSnapshot doc;
+            try {
+                doc = db.collection("products").document(item.getProductId()).get().get();
+            } catch (Exception e) {
+                System.out.println("Erreur Firestore : " + e.getMessage());
+                notAvailable.add(wishedOnly(item));
+                continue;
+            }
+
+            if (!doc.exists()) {
+                System.out.println("Produit non trouvé : " + item.getProductId());
+                notAvailable.add(wishedOnly(item));
+                continue;
+            }
+
+            Product product = doc.toObject(Product.class);
+            int requestedQty;
+            try {
+                requestedQty = Integer.parseInt(item.getQuantity());
+            } catch (Exception e) {
+                System.out.println("Quantité invalide pour produit " + item.getProductId());
+                notAvailable.add(wishedOnly(item));
+                continue;
+            }
+
+            int stock = product.getStock();
+            List<AvailableProductDto> suggestions = new ArrayList<>();
+
+            if (stock >= requestedQty) {
+
+                ordered.add(new AvailableProductDto(product.getId(), product.getName()));
+            } else {
+                int missingQty = requestedQty - stock;
+
+                if (product.getTag() != null) {
+                    try {
+                        QuerySnapshot similarDocs = db.collection("products")
+                                .whereEqualTo("tag", product.getTag())
+                                .get().get();
+
+                        for (DocumentSnapshot similarDoc : similarDocs.getDocuments()) {
+                            Product similar = similarDoc.toObject(Product.class);
+                            if (similar.getId().equals(product.getId())) continue;
+                            if (similar.getStock() <= 0) continue;
+
+                            suggestions.add(new AvailableProductDto(similar.getId(), similar.getName()));
+                            missingQty -= similar.getStock();
+
+                            if (missingQty <= 0) break;
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Erreur produits similaires : " + e.getMessage());
+                    }
+                }
+
+                WishedAndAvailableProductDto dto = new WishedAndAvailableProductDto();
+                dto.setWishedProduct(List.of(item));
+                dto.setAvailableProduct(suggestions);
+
+                if (suggestions.isEmpty() || missingQty > 0) {
+                    notAvailable.add(dto);
+                } else {
+                    partiallyOrdered.add(dto);
+                }
+            }
+        }
+
+        String status;
+        if (!notAvailable.isEmpty()) {
+            status = "FAILED";
+        } else if (!partiallyOrdered.isEmpty()) {
+            status = "PARTIALLY";
+        } else {
+            status = "OK";
+        }
+
+        ProductOrderResponseDto response = new ProductOrderResponseDto();
+        response.setOrderId(order.getOrderId());
+        response.setStatus(status);
+        response.setOrdered(ordered);
+        response.setPartiallyOrdered(partiallyOrdered);
+        response.setNotAvailable(notAvailable);
+
+        return response;
+    }
+
+    private WishedAndAvailableProductDto wishedOnly(WishedProductDto wished) {
+        WishedAndAvailableProductDto dto = new WishedAndAvailableProductDto();
+        dto.setWishedProduct(List.of(wished));
+        dto.setAvailableProduct(List.of());
+        return dto;
     }
 }

@@ -10,7 +10,7 @@ public class ProductConsumer {
     private static final Logger logger = LoggerFactory.getLogger(ProductConsumer.class);
 
 //    @RabbitListener(queues = RabbitMQConfig.COMMANDE_PRODUIT_QUEUE)
-//    public void consummerOrderProduct(ProductOrderDto message) throws ExecutionException, InterruptedException {
+//    public void consummerOrderProduct(WishedProductDto message) throws ExecutionException, InterruptedException {
 //        System.out.println("Message reçu : Produit ID = " + message.getProductId() + ", Quantité = " + message.getStock());
 //
 //        boolean commandeIsOk = ProductService.manageProductOrders(message.getProductId(), message.getStock());

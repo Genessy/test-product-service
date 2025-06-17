@@ -1,4 +1,4 @@
-package com.epsi.TestProductService.dto;
+package com.epsi.TestProductService.dto.common;
 
 public class ProductCreateRequest {
     private ProductData data;

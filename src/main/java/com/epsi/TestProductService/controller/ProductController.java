@@ -1,8 +1,8 @@
 package com.epsi.TestProductService.controller;
 
-import com.epsi.TestProductService.dto.ProductCreateRequest;
-import com.epsi.TestProductService.dto.ProductDto;
-import com.epsi.TestProductService.dto.ProductResponse;
+import com.epsi.TestProductService.dto.common.ProductCreateRequest;
+import com.epsi.TestProductService.dto.common.ProductDto;
+import com.epsi.TestProductService.dto.common.ProductResponse;
 import com.epsi.TestProductService.entity.Product;
 import com.epsi.TestProductService.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
