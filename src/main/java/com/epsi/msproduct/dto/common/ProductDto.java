@@ -8,7 +8,9 @@ public class ProductDto {
     private Integer stock;
     private String tag;
 
-    public ProductDto() {}
+    public ProductDto() {
+        //Constructeur vide requis pour la sérialisation/désérialisation
+    }
 
     public String getName() {
         return name;

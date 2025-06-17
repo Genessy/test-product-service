@@ -142,7 +142,7 @@ public class ProductService {
         for (WishedProductDto item : order.getProducts()) {
             DocumentSnapshot doc;
             try {
-                doc = db.collection("products").document(item.getProductId()).get().get();
+                doc = db.collection(COLLECTION_NAME).document(item.getProductId()).get().get();
             } catch (Exception e) {
                 System.out.println("Erreur Firestore : " + e.getMessage());
                 notAvailable.add(wishedOnly(item));
@@ -176,7 +176,7 @@ public class ProductService {
 
                 if (product.getTag() != null) {
                     try {
-                        QuerySnapshot similarDocs = db.collection("products")
+                        QuerySnapshot similarDocs = db.collection(COLLECTION_NAME)
                                 .whereEqualTo("tag", product.getTag())
                                 .get().get();
 
