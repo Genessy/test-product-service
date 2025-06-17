@@ -76,11 +76,11 @@ public class ProductService {
 
             docRef.set(data).get();
 
-            return "Produit bien ajouté à la base de donnée.";
-        } catch (Exception e) {
-            throw new RuntimeException("Erreur lors de l'ajour d'un produit", e);
-        }
+            return docRef.getId();
 
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de l'ajout d'un produit", e);
+        }
     }
 
     public void putProduct(Product product) {

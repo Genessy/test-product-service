@@ -8,6 +8,7 @@ import com.epsi.msproduct.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
@@ -49,7 +50,7 @@ public class ProductController {
             response.setId(product.getId());
             response.setAttributes(attributes);
             return response;
-        }).collect(Collectors.toList());
+        }).toList();
 
         Map<String, Object> jsonApi = new HashMap<>();
         jsonApi.put("data", responseList);
@@ -98,25 +99,22 @@ public class ProductController {
 
         String id = productService.addProduct(product);
 
-        List<Product> produits = productService.getAllProducts();
-        Product createdProduct = produits.stream().filter(p -> p.getName().equals(product.getName())).findFirst().orElse(null);
-
-        ProductResponse.ProductAttributes attributes = new ProductResponse.ProductAttributes();
-        attributes.setName(product.getName());
-        attributes.setDescription(product.getDescription());
-        attributes.setOrigin(product.getOrigin());
-        attributes.setPrice(product.getPrice());
-        attributes.setStock(product.getStock());
-        attributes.setTag(product.getTag());
+        ProductResponse.ProductAttributes responseAttrs = new ProductResponse.ProductAttributes();
+        responseAttrs.setName(product.getName());
+        responseAttrs.setDescription(product.getDescription());
+        responseAttrs.setOrigin(product.getOrigin());
+        responseAttrs.setPrice(product.getPrice());
+        responseAttrs.setStock(product.getStock());
+        responseAttrs.setTag(product.getTag());
 
         ProductResponse response = new ProductResponse();
-        response.setId(createdProduct != null ? createdProduct.getId() : "unknown");
-        response.setAttributes(attributes);
+        response.setId(id);
+        response.setAttributes(responseAttrs);
 
         Map<String, Object> jsonApi = new HashMap<>();
         jsonApi.put("data", response);
 
-        return ResponseEntity.status(201).body(jsonApi);
+        return ResponseEntity.status(HttpStatus.CREATED).body(jsonApi);
     }
 
     @Tag(name = "\uD83E\uDEB6 Écriture")
