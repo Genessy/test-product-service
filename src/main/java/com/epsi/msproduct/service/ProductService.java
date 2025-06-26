@@ -156,6 +156,8 @@ public class ProductService {
             }
 
             Product product = doc.toObject(Product.class);
+            product.setId(doc.getId());
+
             int requestedQty;
             try {
                 requestedQty = Integer.parseInt(item.getQuantity());
@@ -182,6 +184,7 @@ public class ProductService {
 
                         for (DocumentSnapshot similarDoc : similarDocs.getDocuments()) {
                             Product similar = similarDoc.toObject(Product.class);
+                            similar.setId(similarDoc.getId());
                             if (similar.getId().equals(product.getId())) continue;
                             if (similar.getStock() <= 0) continue;
 

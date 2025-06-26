@@ -1,8 +1,13 @@
 package com.epsi.msproduct.dto.order.common;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class WishedProductDto {
+    @JsonProperty("IdProduct")
     private String productId;
+    @JsonProperty("Name")
     private String productName;
+    @JsonProperty("Quantity")
     private String quantity;
 
     public String getProductId() {
