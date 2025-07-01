@@ -34,7 +34,7 @@ public class ProductController {
     @GetMapping("products")
     @Operation(summary = "Obtenir tous les produits de la base de donnée.")
     public ResponseEntity<Map<String, Object>> getAllProducts() {
-        logger.info("Obtenir tous les produits : ✅");
+        logger.info("Obtention de tous les produits.");
         List<Product> products = productService.getAllProducts();
 
         List<ProductResponse> responseList = products.stream().map(product -> {
@@ -62,7 +62,7 @@ public class ProductController {
     @GetMapping("products/{id}")
     @Operation(summary = "Récupère un produit par son ID.")
     public ResponseEntity<Map<String, Object>> getProduct(@PathVariable String id) {
-        logger.info("Récupération d’un produit par ID : 🔎 {}", id);
+        logger.info("Récupération d’un produit par son ID : {}.", id);
         Product product = productService.getProduct(id);
 
         ProductResponse.ProductAttributes attributes = new ProductResponse.ProductAttributes();
@@ -87,6 +87,7 @@ public class ProductController {
     @PostMapping("products")
     @Operation(summary = "Ajoute un produit à la base de donnée (format JSON:API).")
     public ResponseEntity<Map<String, Object>> addProduct(@RequestBody ProductCreateRequest request) {
+        logger.info("Ajout d’un produit à la base de donnée.");
         ProductCreateRequest.ProductAttributes attrs = request.getData().getAttributes();
 
         Product product = new Product();
@@ -130,7 +131,7 @@ public class ProductController {
         product.setStock(productDto.getStock());
         product.setTag(productDto.getTag());
 
-        logger.info("Modification totale d'un produit : ✅ {}", product.getName());
+        logger.info("Modification d'un produit : {}.", product.getName());
         productService.putProduct(product);
 
         return ResponseEntity.status(200).build();
@@ -140,7 +141,7 @@ public class ProductController {
     @DeleteMapping("products/{id}")
     @Operation(summary = "Supprime le produit de la base de données.")
     public ResponseEntity<String> deleteProduct(@PathVariable String id) {
-        logger.info("Suppression d'un produit : ✅ {}", id);
+        logger.info("Suppression d'un produit par son ID : {}.", id);
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
